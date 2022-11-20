@@ -33,6 +33,7 @@ func main() {
 
 	{
 		app.Get("/test", api.Test)
+		app.Get("/send_email", api.SendEmail)
 	}
 
 	app.Listen(":3000")

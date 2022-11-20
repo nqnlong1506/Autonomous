@@ -10,7 +10,7 @@ const (
 	appPassword  = "fzfidhmsogkovbum"
 )
 
-func SendMailForUpdatingInventory(vendorEmail string) error {
+func SendMailForUpdatingInventory(vendorEmail, vendorName, productName string) error {
 	// from := "taobiettaophailamgi@gmail.com"
 	// password := "fzfidhmsogkovbum"
 
@@ -22,7 +22,7 @@ func SendMailForUpdatingInventory(vendorEmail string) error {
 	address := host + ":" + port
 
 	subject := "Subject: Update inventory urgently for more orders!!!\n"
-	body := fmt.Sprintf("Hi %s team,\n\nYour product %s is selling fastly and going to be out of stock. Please help us to update the stock as soon as possible if your inventory is still available to sell. If not, when the product reach the lowest stock, we will make the one become Pre-Order for more 1 months and you can track the order later.\nLooking forward to hearing from you soon.\n\nThanks and best regards,\nGalvin.", "vender_name", "product_name")
+	body := fmt.Sprintf("Hi %s team,\n\nYour product %s is selling fastly and going to be out of stock. Please help us to update the stock as soon as possible if your inventory is still available to sell. If not, when the product reach the lowest stock, we will make the one become Pre-Order for more 1 months and you can track the order later.\nLooking forward to hearing from you soon.\n\nThanks and best regards,\nGalvin.", vendorName, productName)
 	message := []byte(subject + body)
 
 	auth := smtp.PlainAuth("", companyEmail, appPassword, host)
