@@ -2,11 +2,18 @@ package main
 
 import (
 	"Autonomous/api"
+	mongoClient "Autonomous/mongo"
+	"context"
 	"encoding/json"
+	"log"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"go.mongodb.org/mongo-driver/mongo"
 )
+
+var collection *mongo.Collection
+var ctx = context.TODO()
 
 type apiInfo struct {
 	Service  string    `json:"service"`
@@ -28,6 +35,16 @@ func infoHandle(c *fiber.Ctx) error {
 
 func main() {
 	app := fiber.New()
+
+	// connect mongodb
+	{
+		uri := "mongodb://localhost:27017/"
+		database := "autonomous"
+		err := mongoClient.InitializeClient(ctx, uri, database)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 
 	app.Get("/", infoHandle)
 
