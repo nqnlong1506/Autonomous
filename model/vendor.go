@@ -1,9 +1,24 @@
 package model
 
+import (
+	"go.mongodb.org/mongo-driver/mongo"
+)
+
 type Vendor struct {
-	Name         string   `json:"VendorName"`
-	Email        string   `json:"email"`
-	Address      string   `json:"address"`
-	CeoName      string   `json:"ceoName"`
-	ListProducts []string `json:"listTProducts"`
+	VendorID   int    `json:"vendorID,omitempty" bson:"vendor_id,omitempty"`
+	VendorName string `json:"vendorName,omitempty" bson:"vendor_name,omitempty"`
+	Email      string `json:"email,omitempty" bson:"email,omitempty"`
+	// Address      string   `json:"address,omitempty" bson:"address,omitempty"`
+	// CeoName      string   `json:"ceoName,omitempty" bson:"ceo_name"`
+	ListProducts []string `json:"listTProducts,omitempty" bson:"list_products"`
+	ReceivedMail bool     `bson:"received_mail"`
+
+	Username string `json:"username" bson:"username"`
+	Password string `json:"password" bson:"password"`
+}
+
+var VendorCollection *mongo.Collection
+
+func InitVendorCollection(database mongo.Database) {
+	VendorCollection = database.Collection("vendor")
 }

@@ -1,11 +1,25 @@
 package model
 
+import "go.mongodb.org/mongo-driver/mongo"
+
+const (
+	PRE_ORDER = "Pre-Order"
+	BUY_NOW   = "Buy-Now"
+)
+
 type Product struct {
-	ProductName  string `json:"productName"`
-	VendorName   string `json:"vendorName"`
-	Available    int    `json:"available"`
-	IsBestSeller bool   `json:"isBestSeller"`
-	Minimum      int    `json:"minimum"`
-	BuyNow       bool   `json:"buyNow"`
-	Sku          string `json:"sku"`
+	ProductID    int    `json:"productID,omitempty" bson:"product_id,omitempty"`
+	ProductName  string `json:"productName,omitempty" bson:"product_name,omitempty"`
+	VendorID     int    `json:"vendorID,omitempty" bson:"vendor_id,omitempty"`
+	Available    int    `json:"available,omitempty" bson:"available,omitempty"`
+	IsBestSeller bool   `json:"isBestSeller,omitempty" bson:"is_best_seller"`
+	Minimum      int    `json:"-" bson:"minimum,omitempty"`
+	Status       string `json:"-" bson:"status,omitempty"`
+	Sku          string `json:"sku,omitempty" bson:"sku,omitempty"`
+}
+
+var ProductCollection *mongo.Collection
+
+func InitProductCollection(database mongo.Database) {
+	ProductCollection = database.Collection("product")
 }

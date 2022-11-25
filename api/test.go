@@ -1,14 +1,15 @@
 package api
 
 import (
-	"Autonomous/controller"
 	"Autonomous/model"
 	"context"
 	"fmt"
+	"log"
 
 	mongoClient "Autonomous/mongo"
 
 	"github.com/gofiber/fiber/v2"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 var ctx = context.TODO()
@@ -41,9 +42,39 @@ func Test(c *fiber.Ctx) error {
 }
 
 func SendEmail(c *fiber.Ctx) error {
-	err := controller.SendMailForUpdatingInventory("nqnl1506@gmail.com", "nha sach sai gon", "sach tieng anh")
-	if err != nil {
-		return c.SendString(err.Error())
-	}
+	model.VendorCollection.UpdateMany(ctx, bson.M{}, bson.M{
+		"$set": bson.M{
+			"received_mail": false,
+		},
+	})
 	return c.SendString("Sending Email Successfully!")
+}
+
+func InsertCustomer(c *fiber.Ctx) error {
+	result, err := model.ProductCollection.UpdateMany(ctx, bson.M{}, bson.M{
+		"$set": bson.M{
+			"available": 12,
+			"status":    model.BUY_NOW,
+		},
+	})
+
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+
+	fmt.Println(result)
+	return nil
+}
+
+func InsertProduct(c *fiber.Ctx) error {
+	result, err := model.ProductCollection.InsertOne(ctx, model.Product{})
+
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+
+	fmt.Println(result)
+	return nil
 }

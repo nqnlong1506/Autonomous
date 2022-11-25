@@ -2,9 +2,9 @@ package main
 
 import (
 	"Autonomous/api"
+	"Autonomous/model"
 	mongoClient "Autonomous/mongo"
 	"context"
-	"encoding/json"
 	"log"
 	"time"
 
@@ -28,9 +28,10 @@ func infoHandle(c *fiber.Ctx) error {
 		Version:  "v.0.1.0",
 	}
 
-	response, _ := json.Marshal(info)
-
-	return c.SendString(string(response))
+	return c.Status(200).JSON(model.Response{
+		Status: "OK",
+		Data:   info,
+	})
 }
 
 func main() {
@@ -45,12 +46,47 @@ func main() {
 			log.Fatal(err)
 		}
 	}
+	// init collection
+	{
+		model.InitCustomerCollection(*mongoClient.Database)
+		model.InitProductCollection(*mongoClient.Database)
+		model.InitVendorCollection(*mongoClient.Database)
+		model.InitOrderCollection(*mongoClient.Database)
+		model.InitPreOrderCollection(*mongoClient.Database)
+	}
 
 	app.Get("/", infoHandle)
-
 	{
 		app.Get("/test", api.Test)
 		app.Get("/send_email", api.SendEmail)
+		app.Post("/customer/test", api.InsertCustomer)
+		app.Post("/product/test", api.InsertProduct)
+	}
+	// vendor
+	{
+		app.Get("/vendor", api.GetVendorInfo)
+		app.Post("/vendor/create", api.CreateVendorInfo)
+	}
+	// product
+	{
+		app.Get("/product", api.GetProductInfo)
+		app.Get("/product/all", api.GetAllProduct)
+		app.Post("/product/create", api.CreateProduct)
+		app.Put("/product/import", api.ImportProducts)
+		app.Put("/product/update/best-seller", api.UpdateBestSellerProduct)
+		app.Put("/product/update/non-best-seller", api.UpdateNonBestSellerProduct)
+	}
+	// order
+	{
+		app.Post("/order/create", api.CreateOrder)
+	}
+	// pre-order
+	{
+		app.Post("/pre-order/create", api.CreatePreOrder)
+	}
+	// customer
+	{
+		// app.Post("/customer/order", api.GetOrder)
 	}
 
 	app.Listen(":3000")
