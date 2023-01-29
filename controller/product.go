@@ -201,3 +201,19 @@ func ImportProducts(sku string, number int) error {
 
 	return nil
 }
+
+func UpdateProductImageLink(product model.Product) error {
+	_, err := model.ProductCollection.UpdateOne(ctx, bson.M{
+		"product_id": product.ProductID,
+	}, bson.M{
+		"$set": bson.M{
+			"image_link": product.ImageLink,
+		},
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

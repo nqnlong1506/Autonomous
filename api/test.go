@@ -78,3 +78,21 @@ func InsertProduct(c *fiber.Ctx) error {
 	fmt.Println(result)
 	return nil
 }
+
+func SetPrice(c *fiber.Ctx) error {
+	result, err := model.ProductCollection.UpdateMany(ctx, bson.M{}, bson.M{
+		"$set": bson.M{
+			"price": 99,
+		},
+	})
+
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+
+	fmt.Println(result)
+	return c.Status(200).JSON(model.Response{
+		Status: "OK",
+	})
+}

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -36,6 +37,7 @@ func infoHandle(c *fiber.Ctx) error {
 
 func main() {
 	app := fiber.New()
+	app.Use(cors.New())
 
 	// connect mongodb
 	{
@@ -61,6 +63,7 @@ func main() {
 		app.Get("/send_email", api.SendEmail)
 		app.Post("/customer/test", api.InsertCustomer)
 		app.Post("/product/test", api.InsertProduct)
+		app.Put("/product/set-price", api.SetPrice)
 	}
 	// vendor
 	{
@@ -73,6 +76,7 @@ func main() {
 		app.Get("/product/all", api.GetAllProduct)
 		app.Post("/product/create", api.CreateProduct)
 		app.Put("/product/import", api.ImportProducts)
+		app.Put("/product/image", api.InsertImage)
 		app.Put("/product/update/best-seller", api.UpdateBestSellerProduct)
 		app.Put("/product/update/non-best-seller", api.UpdateNonBestSellerProduct)
 	}
@@ -86,7 +90,8 @@ func main() {
 	}
 	// customer
 	{
-		// app.Post("/customer/order", api.GetOrder)
+		app.Post("/customer/create", api.CreateCustomer)
+		app.Post("/customer/login", api.LoginCustomer)
 	}
 
 	app.Listen(":80")

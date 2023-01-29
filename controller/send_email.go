@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	companyEmail = "taobiettaophailamgi@gmail.com"
-	appPassword  = "fzfidhmsogkovbum"
+	companyEmail = "ngocdang1607@gmail.com"
+	appPassword  = "ucljeijwbchnboqy"
 )
 
 func SendMailForUpdatingInventory(vendorID int, productName string, sku string) error {

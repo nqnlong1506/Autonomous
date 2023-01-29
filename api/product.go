@@ -40,6 +40,12 @@ func CreateProduct(c *fiber.Ctx) error {
 			Messsage: "product sku needed",
 		})
 	}
+	if product.Price <= 0 {
+		return c.Status(400).JSON(model.Response{
+			Status:   "Invalid",
+			Messsage: "product price needed",
+		})
+	}
 	if product.Available <= 1 {
 		product.Available = 1
 	}
@@ -151,6 +157,7 @@ func GetProductInfo(c *fiber.Ctx) error {
 }
 
 func GetAllProduct(c *fiber.Ctx) error {
+
 	listProducts, err := controller.GetAllProduct()
 	if err != nil {
 		return c.Status(400).JSON(model.Response{
@@ -200,5 +207,42 @@ func ImportProducts(c *fiber.Ctx) error {
 	return c.Status(200).JSON(model.Response{
 		Status:   "OK",
 		Messsage: "import products successfully",
+	})
+}
+
+func InsertImage(c *fiber.Ctx) error {
+	var product model.Product
+	if err := c.BodyParser(&product); err != nil {
+		return c.Status(400).JSON(model.Response{
+			Status:   "Error",
+			Messsage: err.Error(),
+		})
+	}
+
+	if product.ProductID <= 0 {
+		return c.Status(400).JSON(model.Response{
+			Status:   "Invalid",
+			Messsage: "product id needed",
+		})
+	}
+
+	if product.ImageLink == "" {
+		return c.Status(400).JSON(model.Response{
+			Status:   "Invalid",
+			Messsage: "product image link needed",
+		})
+	}
+
+	errUpdate := controller.UpdateProductImageLink(product)
+	if errUpdate != nil {
+		return c.Status(400).JSON(model.Response{
+			Status:   "Error",
+			Messsage: errUpdate.Error(),
+		})
+	}
+
+	return c.Status(200).JSON(model.Response{
+		Status:   "OK",
+		Messsage: "update image link successfully",
 	})
 }
