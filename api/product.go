@@ -193,7 +193,7 @@ func ImportProducts(c *fiber.Ctx) error {
 	if products.Number <= 0 {
 		return c.Status(400).JSON(model.Response{
 			Status:   "Invalid",
-			Messsage: "number of products needed",
+			Messsage: "number of products needed for importing",
 		})
 	}
 

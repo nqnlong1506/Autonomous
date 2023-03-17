@@ -76,3 +76,45 @@ func CreateVendorInfo(c *fiber.Ctx) error {
 		Messsage: "Create vendor successfully",
 	})
 }
+
+func LoginVendor(c *fiber.Ctx) error {
+	var loginForm struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
+
+	if err := c.BodyParser(&loginForm); err != nil {
+		return c.Status(400).JSON(model.Response{
+			Status:   "Error",
+			Messsage: err.Error(),
+		})
+	}
+
+	if loginForm.Username == "" {
+		return c.Status(400).JSON(model.Response{
+			Status:   "Invalid",
+			Messsage: "username needed",
+		})
+	}
+
+	if loginForm.Password == "" {
+		return c.Status(400).JSON(model.Response{
+			Status:   "Invalid",
+			Messsage: "password needed",
+		})
+	}
+
+	customer, err := controller.LoginVendor(loginForm.Username, loginForm.Password)
+	if err != nil {
+		return c.Status(203).JSON(model.Response{
+			Status:   "Incorrect",
+			Messsage: "incorrect username or password",
+		})
+	}
+
+	return c.Status(200).JSON(model.Response{
+		Status:   "OK",
+		Messsage: "OK",
+		Data:     customer,
+	})
+}

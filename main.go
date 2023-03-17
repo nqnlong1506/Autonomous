@@ -58,17 +58,11 @@ func main() {
 	}
 
 	app.Get("/", infoHandle)
-	{
-		app.Get("/test", api.Test)
-		app.Get("/send_email", api.SendEmail)
-		app.Post("/customer/test", api.InsertCustomer)
-		app.Post("/product/test", api.InsertProduct)
-		app.Put("/product/set-price", api.SetPrice)
-	}
 	// vendor
 	{
 		app.Get("/vendor", api.GetVendorInfo)
 		app.Post("/vendor/create", api.CreateVendorInfo)
+		app.Post("/vendor/login", api.LoginVendor)
 	}
 	// product
 	{
@@ -87,6 +81,9 @@ func main() {
 	// pre-order
 	{
 		app.Post("/pre-order/create", api.CreatePreOrder)
+		app.Get("/pre-order/list", api.ListAllPreOrder)
+		app.Get("/pre-order", api.GetPreOrderByID)
+		app.Post("/pre-order/process", api.ProcessPreOrder)
 	}
 	// customer
 	{

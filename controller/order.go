@@ -3,6 +3,7 @@ package controller
 import (
 	"Autonomous/model"
 	"fmt"
+	"log"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -32,18 +33,35 @@ func CreateOrder(order model.Order) (*model.Order, error) {
 	if product.Status != model.BUY_NOW {
 		return nil, fmt.Errorf("you cannot buy-now this product")
 	}
+	// check number of available products
+	if product.Available <= order.Number {
+		newPreOrder := model.PreOrder{
+			PreOrderID:   id,
+			Number:       order.Number,
+			CustomerID:   order.CustomerID,
+			CustomerName: order.CustomerName,
+			ProductID:    order.ProductID,
+			ProductName:  product.ProductName,
+			VendorID:     product.VendorID,
+		}
+		go CreatePreOrderForHugeQuantity(newPreOrder)
+		return nil, fmt.Errorf("we do not have enough quantity for your order, so your order is in pre-order now")
+	}
 	// create new order
 	newOrder := model.Order{
-		OrderID:    id,
-		CustomerID: order.CustomerID,
-		ProductID:  order.ProductID,
+		OrderID:      id,
+		Number:       order.Number,
+		CustomerID:   order.CustomerID,
+		CustomerName: order.CustomerName,
+		ProductID:    order.ProductID,
+		ProductName:  product.ProductName,
 	}
 	_, errInsert := model.OrderCollection.InsertOne(ctx, newOrder)
 	if errInsert != nil {
 		return nil, errInsert
 	}
 	// update product
-	go updateAvailableAfterBuy(product)
+	go updateAvailableAfterBuy(product, order.Number)
 	return &newOrder, nil
 }
 
@@ -85,25 +103,28 @@ func genOrderID() (int, error) {
 	return list[0].OrderID + 1, nil
 }
 
-func updateAvailableAfterBuy(product model.Product) error {
+func updateAvailableAfterBuy(product model.Product, number int) error {
+	operation := number * -1
 	updater := bson.M{
 		"$inc": bson.M{
-			"available": -1,
+			"available": operation,
 		},
 	}
-	if product.Available <= 2 {
+	if product.Available-number <= 1 {
 		updater["$set"] = bson.M{
 			"status": model.PRE_ORDER,
 		}
 	}
 	_, errUpdate := model.ProductCollection.UpdateOne(ctx, product, updater)
 	if errUpdate != nil {
-		fmt.Println(errUpdate.Error())
+		log.Fatal(errUpdate.Error())
 	}
 
 	// send email to vendor
-	if product.Available-1 == product.Minimum {
-		SendMailForUpdatingInventory(product.VendorID, product.ProductName, product.Sku)
+	if product.Available-number <= product.Minimum {
+		if !product.ReceivedMail {
+			SendMailForUpdatingInventory(product.VendorID, product)
+		}
 	}
 	return nil
 }

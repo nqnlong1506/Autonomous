@@ -18,6 +18,7 @@ type Product struct {
 	Status       string `json:"status" bson:"status,omitempty"`
 	Sku          string `json:"sku,omitempty" bson:"sku,omitempty"`
 	ImageLink    string `json:"imageLink,omitempty" bson:"image_link"`
+	ReceivedMail bool   `bson:"received_mail"`
 }
 
 var ProductCollection *mongo.Collection

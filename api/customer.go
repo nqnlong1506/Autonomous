@@ -3,7 +3,6 @@ package api
 import (
 	"Autonomous/controller"
 	"Autonomous/model"
-	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -36,7 +35,6 @@ func CreateCustomer(c *fiber.Ctx) error {
 		})
 	}
 
-	fmt.Println(customer)
 	return c.Status(200).JSON(model.Response{
 		Status:   "OK",
 		Messsage: "OK",
@@ -69,7 +67,6 @@ func LoginCustomer(c *fiber.Ctx) error {
 			Messsage: "password needed",
 		})
 	}
-	fmt.Println("login:", loginForm)
 
 	customer, err := controller.LoginCustomer(loginForm.Username, loginForm.Password)
 	if err != nil {

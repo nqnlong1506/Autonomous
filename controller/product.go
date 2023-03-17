@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func CreateProduct(product model.Product) error {
@@ -145,38 +144,34 @@ func ImportProducts(sku string, number int) error {
 		return fmt.Errorf("this product does not exist")
 	}
 
+	// get info existing product
 	var product model.Product
 	err := existingProduct.Decode(&product)
 	if err != nil {
 		return err
 	}
-	// handle preorder
-	opts := options.Find().SetSort(bson.M{"pre_order_id": 1}).SetLimit(int64(number + product.Available - 1))
-	cursor, errFind := model.PreOrderCollection.Find(ctx, bson.M{
-		"product_id": product.ProductID,
-		"is_done":    false,
-	}, opts)
-	if errFind != nil {
-		return errFind
-	}
-	var listPreOrder []model.PreOrder
-	cursor.All(ctx, &listPreOrder)
 
-	// var listPreOrderID []int
-	// for _, p := range listPreOrder {
-	// 	listPreOrderID = append(listPreOrderID, p.PreOrderID)
-	// }
-
-	go HandlePreOrder(listPreOrder)
-
-	if len(listPreOrder) == number {
+	// ready for next email
+	if product.Available+number > product.Minimum {
+		_, errUpdate := model.ProductCollection.UpdateOne(ctx, product, bson.M{
+			"$inc": bson.M{
+				"available": number,
+			},
+			"$set": bson.M{
+				"status":        model.BUY_NOW,
+				"received_mail": false,
+			},
+		})
+		if errUpdate != nil {
+			return errUpdate
+		}
 		return nil
 	}
 
 	// update product available
 	_, errUpdate := model.ProductCollection.UpdateOne(ctx, product, bson.M{
 		"$inc": bson.M{
-			"available": number - len(listPreOrder),
+			"available": number,
 		},
 		"$set": bson.M{
 			"status": model.BUY_NOW,
@@ -184,19 +179,6 @@ func ImportProducts(sku string, number int) error {
 	})
 	if errUpdate != nil {
 		return errUpdate
-	}
-
-	// set received_mail to false
-	if product.Available+number > product.Minimum {
-		filter := bson.M{
-			"vendor_id": product.VendorID,
-		}
-		updater := bson.M{
-			"$set": bson.M{
-				"received_mail": false,
-			},
-		}
-		model.VendorCollection.UpdateOne(ctx, filter, updater)
 	}
 
 	return nil

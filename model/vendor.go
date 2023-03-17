@@ -10,8 +10,7 @@ type Vendor struct {
 	Email      string `json:"email,omitempty" bson:"email,omitempty"`
 	// Address      string   `json:"address,omitempty" bson:"address,omitempty"`
 	// CeoName      string   `json:"ceoName,omitempty" bson:"ceo_name"`
-	ListProducts []string `json:"listTProducts,omitempty" bson:"list_products"`
-	ReceivedMail bool     `bson:"received_mail"`
+	ListProducts []string `json:"listProducts,omitempty" bson:"list_products"`
 
 	Username string `json:"username" bson:"username"`
 	Password string `json:"password" bson:"password"`

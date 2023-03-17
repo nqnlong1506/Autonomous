@@ -29,3 +29,18 @@ func CreateVendorInfo(vendor model.Vendor) error {
 
 	return nil
 }
+
+func LoginVendor(username string, password string) (*model.Vendor, error) {
+	filterVendor := bson.M{
+		"username": username,
+		"password": password,
+	}
+	result := model.VendorCollection.FindOne(ctx, filterVendor)
+	var data model.Vendor
+	result.Decode(&data)
+	if result.Err() != nil {
+		return nil, result.Err()
+	}
+
+	return &data, nil
+}
