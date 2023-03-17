@@ -2,13 +2,14 @@ package main
 
 import (
 	"Autonomous/api"
+	"Autonomous/model"
 	mongoClient "Autonomous/mongo"
 	"context"
-	"encoding/json"
 	"log"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -28,13 +29,15 @@ func infoHandle(c *fiber.Ctx) error {
 		Version:  "v.0.1.0",
 	}
 
-	response, _ := json.Marshal(info)
-
-	return c.SendString(string(response))
+	return c.Status(200).JSON(model.Response{
+		Status: "OK",
+		Data:   info,
+	})
 }
 
 func main() {
 	app := fiber.New()
+	app.Use(cors.New())
 
 	// connect mongodb
 	{
@@ -45,13 +48,48 @@ func main() {
 			log.Fatal(err)
 		}
 	}
-
-	app.Get("/", infoHandle)
-
+	// init collection
 	{
-		app.Get("/test", api.Test)
-		app.Get("/send_email", api.SendEmail)
+		model.InitCustomerCollection(*mongoClient.Database)
+		model.InitProductCollection(*mongoClient.Database)
+		model.InitVendorCollection(*mongoClient.Database)
+		model.InitOrderCollection(*mongoClient.Database)
+		model.InitPreOrderCollection(*mongoClient.Database)
 	}
 
-	app.Listen(":3000")
+	app.Get("/", infoHandle)
+	// vendor
+	{
+		app.Get("/vendor", api.GetVendorInfo)
+		app.Post("/vendor/create", api.CreateVendorInfo)
+		app.Post("/vendor/login", api.LoginVendor)
+	}
+	// product
+	{
+		app.Get("/product", api.GetProductInfo)
+		app.Get("/product/all", api.GetAllProduct)
+		app.Post("/product/create", api.CreateProduct)
+		app.Put("/product/import", api.ImportProducts)
+		app.Put("/product/image", api.InsertImage)
+		app.Put("/product/update/best-seller", api.UpdateBestSellerProduct)
+		app.Put("/product/update/non-best-seller", api.UpdateNonBestSellerProduct)
+	}
+	// order
+	{
+		app.Post("/order/create", api.CreateOrder)
+	}
+	// pre-order
+	{
+		app.Post("/pre-order/create", api.CreatePreOrder)
+		app.Get("/pre-order/list", api.ListAllPreOrder)
+		app.Get("/pre-order", api.GetPreOrderByID)
+		app.Post("/pre-order/process", api.ProcessPreOrder)
+	}
+	// customer
+	{
+		app.Post("/customer/create", api.CreateCustomer)
+		app.Post("/customer/login", api.LoginCustomer)
+	}
+
+	app.Listen(":80")
 }
